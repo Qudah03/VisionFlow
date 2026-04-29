@@ -8,7 +8,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient(); 
 builder.Services.AddDbContext<PantryDb>(opt => opt.UseInMemoryDatabase("Pantry"));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PantryVisionPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
+app.UseCors("PantryVisionPolicy");
 
 // 2. NEW ENDPOINT: Check what is currently in the database
 app.MapGet("/api/inventory", async (PantryDb db) =>
